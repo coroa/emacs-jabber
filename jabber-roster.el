@@ -147,6 +147,11 @@ Trailing newlines are always removed, regardless of this variable."
   :type 'boolean
   :group 'jabber-roster)
 
+(defcustom jabber-roster-show-separators t
+  "Show horizontal lines as separators?"
+  :type 'boolean
+  :group 'jabber-roster)
+
 (defcustom jabber-roster-mode-hook nil
   "Hook run when entering Roster mode."
   :group 'jabber-roster
@@ -541,7 +546,8 @@ C-c C-s  Service menu
 
 H        Toggle displaying this text
 "))
-      (insert "__________________________________\n\n")
+      (when jabber-roster-show-separators
+        (insert "__________________________________\n\n"))
       (if (null jabber-connections)
 	  (insert "Not connected\n")
 	(let ((map (make-sparse-keymap)))
@@ -578,8 +584,11 @@ H        Toggle displaying this text
 					  "@"
 					  (plist-get (fsm-get-state-data jc) :server))
 					 'face 'jabber-title-medium)
-		      "\n__________________________________\n")
-		     "__________________________________"))
+		      (when jabber-roster-show-separators
+                        "\n__________________________________\n"))
+		     (when jabber-roster-show-separators
+                       "_________________________________")
+                     ))
 	      (new-groups '()))
 	  (plist-put(fsm-get-state-data jc) :roster-ewoc ewoc)
 	  (dolist (group (plist-get (fsm-get-state-data jc) :roster-groups))
