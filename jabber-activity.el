@@ -256,32 +256,33 @@ Optional TEXT used with one-to-one or MUC chats and may be used to identify pers
 Optional PRESENCE mean personal presence request or alert."
   (setq jabber-activity-mode-string
   	(if jabber-activity-jids
-	    (mapconcat
-	     (lambda (x)
-	       (let ((jump-to-jid (car x)))
-		 (jabber-propertize
-		  (cdr x)
-		  'face (if (or
-                             (and group text (jabber-muc-looks-like-personal-p text group)) ;MUC message
-                             (and (not group) text) ;one-to-one chat message
-                             presence               ;presence request/alert
-                             )
-                            'jabber-activity-personal-face
-                          'jabber-activity-face)
-		  ;; XXX: XEmacs doesn't have make-mode-line-mouse-map.
-		  ;; Is there another way to make this work?
-		  'local-map (when (fboundp 'make-mode-line-mouse-map)
-			       (make-mode-line-mouse-map
-				'mouse-1 `(lambda ()
-					    (interactive "@")
-					    (jabber-activity-switch-to
-					     ,(car x)))))
-		  'help-echo (concat "Jump to "
-				     (jabber-jid-displayname (car x))
-				     "'s buffer"))))
-	     (mapcar #'jabber-activity-lookup-name
-		     jabber-activity-jids)
-	     ",")
+            (format "[%s] "
+             (mapconcat
+              (lambda (x)
+                (let ((jump-to-jid (car x)))
+                  (jabber-propertize
+                   (cdr x)
+                   'face (if (or
+                              (and group text (jabber-muc-looks-like-personal-p text group)) ;MUC message
+                              (and (not group) text) ;one-to-one chat message
+                              presence  ;presence request/alert
+                              )
+                             'jabber-activity-personal-face
+                           'jabber-activity-face)
+                   ;; XXX: XEmacs doesn't have make-mode-line-mouse-map.
+                   ;; Is there another way to make this work?
+                   'local-map (when (fboundp 'make-mode-line-mouse-map)
+                                (make-mode-line-mouse-map
+                                 'mouse-1 `(lambda ()
+                                             (interactive "@")
+                                             (jabber-activity-switch-to
+                                              ,(car x)))))
+                   'help-echo (concat "Jump to "
+                                      (jabber-jid-displayname (car x))
+                                      "'s buffer"))))
+              (mapcar #'jabber-activity-lookup-name
+                      jabber-activity-jids)
+              ","))
 	  ""))
   (setq jabber-activity-count-string 
 	(number-to-string (length jabber-activity-jids)))
