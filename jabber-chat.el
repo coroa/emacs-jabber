@@ -107,6 +107,11 @@ rare time printed."
   "face for displaying the rare time info"
   :group 'jabber-chat)
 
+(defface jabber-chat-notice-face
+  '((t (:foreground "sea green")))
+  "face for displaying chat notices"
+  :group 'jabber-chat)
+
 (defcustom jabber-chat-local-prompt-format "[%t] %n> "
   "The format specification for lines you type in the chat buffer.
 
@@ -402,7 +407,7 @@ This function is used as an ewoc prettyprinter."
 	    (insert (jabber-propertize (cadr data) 'face 'jabber-chat-error))
 	 (jabber-chat-print-error (cadr data))))
       ((:notice :muc-notice)
-       (insert (cadr data)))
+       (insert (jabber-propertize (cadr data) 'face 'jabber-chat-notice-face)))
       (:rare-time
        (insert (jabber-propertize (format-time-string jabber-rare-time-format (cadr data))
 				  'face 'jabber-rare-time-face)))
