@@ -180,12 +180,13 @@ Either a string or a buffer is returned, so use `get-buffer' or
   "Prepare a buffer for chatroom GROUP.
 This function is idempotent."
   (with-current-buffer (get-buffer-create (jabber-muc-get-buffer group))
+    (set (make-local-variable 'jabber-group) group)
+
     (unless (eq major-mode 'jabber-chat-mode)
       (jabber-chat-mode jc #'jabber-chat-pp))
     ;; Make sure the connection variable is up to date.
     (setq jabber-buffer-connection jc)
 
-    (set (make-local-variable 'jabber-group) group)
     (make-local-variable 'jabber-muc-topic)
     (setq jabber-send-function 'jabber-muc-send)
     (setq header-line-format jabber-muc-header-line-format)

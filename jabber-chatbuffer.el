@@ -49,7 +49,6 @@ window or at `fill-column', whichever is shorter."
 
 (defun jabber-chat-mode (jc ewoc-pp)
   "\\{jabber-chat-mode-map}"
-  (kill-all-local-variables)
   ;; Make sure to set this variable somewhere
   (make-local-variable 'jabber-send-function)
   (make-local-variable 'scroll-conservatively)
