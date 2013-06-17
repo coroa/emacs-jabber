@@ -117,13 +117,14 @@ window or at `fill-column', whichever is shorter."
   ;; This was mostly stolen from article-fill-long-lines
   (interactive)
   (save-excursion
-    (let ((inhibit-read-only t)
-	  (width (window-width (get-buffer-window (current-buffer)))))
+    (let* ((inhibit-read-only t)
+           (width (window-width (get-buffer-window (current-buffer))))
+           (fill-column (min fill-column width)))
       (goto-char (point-min))
       (let ((adaptive-fill-mode nil))	;Why?  -sm
 	(while (not (eobp))
 	  (end-of-line)
-	  (when (>= (current-column) (min fill-column width))
+	  (when (>= (current-column) fill-column)
 	    (save-restriction
 	      (narrow-to-region (min (1+ (point)) (point-max))
 				(point-at-bol))
