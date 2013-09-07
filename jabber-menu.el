@@ -20,40 +20,34 @@
 ;; Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 (require 'jabber-util)
-(require 'jabber-autoloads)
 (eval-when-compile (require 'cl))
 
 ;;;###autoload
 (defvar jabber-menu
   (let ((map (make-sparse-keymap "jabber-menu")))
-    (define-key map
+    (define-key-after map
       [jabber-menu-connect]
       '("Connect" . jabber-connect-all))
 
-    (define-key map
+    (define-key-after map
       [jabber-menu-nextmsg]
-      '("Next unread message" . jabber-activity-switch-to))
+      '(menu-item "Next unread message" jabber-activity-switch-to
+		  :enable (bound-and-true-p jabber-activity-jids)))
 
-    (define-key map
+    (define-key-after map
       [jabber-menu-disconnect]
-      '("Disconnect" . jabber-disconnect))
+      '(menu-item "Disconnect" jabber-disconnect
+		  :enable (bound-and-true-p jabber-connections)))
 
-    (define-key map
+    (define-key-after map
       [jabber-menu-roster]
       '("Switch to roster" . jabber-switch-to-roster-buffer))
 
-    (define-key map
-      [jabber-menu-customize]
-      '("Customize" . jabber-customize))
-
-    (define-key map
-      [jabber-menu-info]
-      '("Help" . jabber-info))
-
-    (define-key map
+    (define-key-after map
       [jabber-menu-status]
-      (cons "Set Status" (make-sparse-keymap "set-status")))
-    
+      `(menu-item "Set Status" ,(make-sparse-keymap "set-status")
+		  :enable (bound-and-true-p jabber-connections)))
+
     (define-key map
       [jabber-menu-status jabber-menu-status-chat]
       '("Chatty" .
@@ -80,6 +74,18 @@
       [jabber-menu-status jabber-menu-status-online]
       '("Online" . jabber-send-default-presence))
 
+    (define-key-after map
+      [separator]
+      '(menu-item "--"))
+
+    (define-key-after map
+      [jabber-menu-customize]
+      '("Customize" . jabber-customize))
+
+    (define-key-after map
+      [jabber-menu-info]
+      '("Help" . jabber-info))
+
     map))
 
 ;;;###autoload
@@ -87,12 +93,12 @@
   "Decide whether the \"Jabber\" menu is displayed in the menu bar.
 If t, always display.
 If nil, never display.
-If maybe, display if any of `jabber-account-list' or `jabber-connections'
-is non-nil."
+If maybe, display if jabber.el is installed under `package-user-dir', or
+if any of `jabber-account-list' or `jabber-connections' is non-nil."
   :group 'jabber
   :type '(choice (const :tag "Never" nil)
 		 (const :tag "Always" t)
-		 (const :tag "When any accounts have been configured or connected" maybe)))
+		 (const :tag "When installed by user, or when any accounts have been configured or connected" maybe)))
 
 (defun jabber-menu (&optional remove)
   "Put \"Jabber\" menu on menubar.
@@ -109,10 +115,21 @@ With prefix argument, remove it."
 (define-key-after (lookup-key global-map [menu-bar])
   [jabber-menu]
   (list 'menu-item "Jabber" jabber-menu
-	:visible '(or (eq jabber-display-menu t)
-		      (and (eq jabber-display-menu 'maybe)
-			   (or jabber-account-list
-			       (bound-and-true-p jabber-connections))))))
+	:visible
+	;; If the package was installed by the user personally, it's
+	;; probably ok to "clutter" the menu bar with a Jabber menu.
+	(let ((user-installed-package
+	       (and (bound-and-true-p package-user-dir)
+		    (string=
+		     (file-name-as-directory
+		      (expand-file-name ".." (file-name-directory load-file-name)))
+		     (file-name-as-directory
+		      (expand-file-name package-user-dir))))))
+	  `(or (eq jabber-display-menu t)
+	       (and (eq jabber-display-menu 'maybe)
+		    (or ,user-installed-package
+			jabber-account-list
+			(bound-and-true-p jabber-connections)))))))
 
 (defvar jabber-jid-chat-menu nil
   "Menu items for chat menu")
